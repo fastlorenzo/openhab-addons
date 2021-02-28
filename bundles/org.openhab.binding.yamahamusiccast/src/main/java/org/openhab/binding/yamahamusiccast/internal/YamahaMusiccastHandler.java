@@ -36,7 +36,9 @@ import org.openhab.binding.yamahamusiccast.internal.dto.RecentInfo;
 import org.openhab.binding.yamahamusiccast.internal.dto.Response;
 import org.openhab.binding.yamahamusiccast.internal.dto.Status;
 import org.openhab.binding.yamahamusiccast.internal.dto.UdpMessage;
+import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.io.transport.upnp.UpnpIOService;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.NextPreviousType;
 import org.openhab.core.library.types.OnOffType;
@@ -49,7 +51,6 @@ import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
-import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.StateOption;
@@ -68,7 +69,7 @@ import com.google.gson.JsonParser;
  * @author Lennert Coopman - Initial contribution
  */
 @NonNullByDefault
-public class YamahaMusiccastHandler extends BaseThingHandler {
+public class YamahaMusiccastHandler extends UpnpAudioSinkHandler {
     private Gson gson = new Gson();
     private Logger logger = LoggerFactory.getLogger(YamahaMusiccastHandler.class);
     private @Nullable ScheduledFuture<?> keepUdpEventsAliveTask;
@@ -141,8 +142,9 @@ public class YamahaMusiccastHandler extends BaseThingHandler {
 
     private YamahaMusiccastStateDescriptionProvider stateDescriptionProvider;
 
-    public YamahaMusiccastHandler(Thing thing, YamahaMusiccastStateDescriptionProvider stateDescriptionProvider) {
-        super(thing);
+    public YamahaMusiccastHandler(Thing thing, YamahaMusiccastStateDescriptionProvider stateDescriptionProvider,
+            UpnpIOService upnpIOService, AudioHTTPServer audioHTTPServer, String callbackUrl) {
+        super(thing, upnpIOService, audioHTTPServer, callbackUrl);
         this.stateDescriptionProvider = stateDescriptionProvider;
     }
 
@@ -1235,4 +1237,16 @@ public class YamahaMusiccastHandler extends BaseThingHandler {
         }
     }
     // End General/System API calls
+
+    @Override
+    public PercentType getVolume() throws IOException {
+        // TODO Auto-generated method stub
+        return new PercentType(0);
+    }
+
+    @Override
+    public void setVolume(PercentType volume) throws IOException {
+        // TODO Auto-generated method stub
+        this.setVolume(volume.intValue(), null, null);
+    }
 }
